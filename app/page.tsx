@@ -1,378 +1,348 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
-import { Search, MapPin, Target, Zap, Clock, Briefcase, Award, CheckCircle2, ChevronRight, Filter } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Plus, Image as ImageIcon, Users, User, X, Filter } from 'lucide-react';
 
 // --- Types ---
-type Profile = {
+type Team = {
   id: string;
   name: string;
-  role: string;
-  hardSkills: string[];
-  paceScale: number; // -5 (Methodical) to +5 (Fast-paced)
-  focusScale: number; // -5 (Big Picture) to +5 (Detail-oriented)
-  roleScale: number; // -5 (Executor) to +5 (Planner)
-  earnedBadges: string[];
-  avatarUrl: string;
+  competition: string;
+  category: string; // e.g., 'สายคอม', 'วิศวกรรม', 'แพทย์'
+  missingRoles: string[];
+  missingCount: number;
+  currentMembers: number;
+  coverColor: string;
 };
 
 // --- Mock Data ---
-const CURRENT_USER: Profile = {
-  id: 'u1',
-  name: 'Tanawat',
-  role: 'AI Engineer / Backend',
-  hardSkills: ['Python', 'OpenCV', 'AI', 'TensorFlow'],
-  paceScale: 3,
-  focusScale: 2,
-  roleScale: 1,
-  earnedBadges: ['AI Visionary', 'Night Owl', 'Hackathon Vet'],
-  avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Tanawat&backgroundColor=1c1f43',
-};
+const CATEGORIES = ["ทั้งหมด", "สายคอม", "วิศวกรรม", "แพทย์", "สถาปัตย์", "บริหารธุรกิจ", "วิทยาศาสตร์"];
 
-const SEEKING_SKILLS = ['Next.js', 'Figma', 'Pitching', 'React'];
-
-const CANDIDATES: Profile[] = [
+const MOCK_TEAMS: Team[] = [
   {
-    id: 'c1',
-    name: 'Somchai',
-    role: 'Frontend Developer',
-    hardSkills: ['Next.js', 'React', 'Tailwind', 'TypeScript'],
-    paceScale: 4,
-    focusScale: 1,
-    roleScale: -4,
-    earnedBadges: ['UI Wizard', 'Pixel Perfect'],
-    avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Somchai&backgroundColor=ec6d8c',
+    id: "t1",
+    name: "CodeBreakers",
+    competition: "NSC 2026",
+    category: "สายคอม",
+    missingRoles: ["Frontend", "UX/UI"],
+    missingCount: 2,
+    currentMembers: 2,
+    coverColor: "bg-blue-100",
   },
   {
-    id: 'c2',
-    name: 'Napat',
-    role: 'UX/UI Designer',
-    hardSkills: ['Figma', 'Prototyping', 'User Research'],
-    paceScale: -2,
-    focusScale: -4,
-    roleScale: -2,
-    earnedBadges: ['Design Thinker', 'Empathy Pro'],
-    avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Napat&backgroundColor=1c1f43',
+    id: "t2",
+    name: "RoboTitans",
+    competition: "World Robot Olympiad",
+    category: "วิศวกรรม",
+    missingRoles: ["Hardware Engineer"],
+    missingCount: 1,
+    currentMembers: 3,
+    coverColor: "bg-orange-100",
   },
   {
-    id: 'c3',
-    name: 'Ploy',
-    role: 'Product Manager / Hacker',
-    hardSkills: ['Pitching', 'Next.js', 'Project Management', 'Figma'],
-    paceScale: 3,
-    focusScale: 2,
-    roleScale: -3,
-    earnedBadges: ['The Pitcher', 'Scrum Master'],
-    avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ploy&backgroundColor=ec6d8c',
+    id: "t3",
+    name: "MedTech Innovators",
+    competition: "HealthHack Thailand",
+    category: "แพทย์",
+    missingRoles: ["Data Scientist", "Biologist"],
+    missingCount: 2,
+    currentMembers: 2,
+    coverColor: "bg-teal-100",
   },
   {
-    id: 'c4',
-    name: 'Krit',
-    role: 'Backend Dev',
-    hardSkills: ['Node.js', 'PostgreSQL', 'Docker'],
-    paceScale: 0,
-    focusScale: 0,
-    roleScale: 4,
-    earnedBadges: ['Bug Hunter', 'Database Guru'],
-    avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Krit&backgroundColor=ed1c24',
+    id: "t4",
+    name: "Pixel Perfect",
+    competition: "Creative App Design",
+    category: "สถาปัตย์",
+    missingRoles: ["3D Animator"],
+    missingCount: 1,
+    currentMembers: 3,
+    coverColor: "bg-pink-100",
   },
   {
-    id: 'c5',
-    name: 'Jane',
-    role: 'Fullstack Dev',
-    hardSkills: ['React', 'Figma', 'Python', 'AWS'],
-    paceScale: 2,
-    focusScale: 3,
-    roleScale: -1,
-    earnedBadges: ['Jack of All Trades', 'Cloud Native'],
-    avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane&backgroundColor=1c1f43',
-  }
+    id: "t5",
+    name: "Cyber Knights",
+    competition: "CTF National",
+    category: "สายคอม",
+    missingRoles: ["Security Analyst", "Backend"],
+    missingCount: 2,
+    currentMembers: 1,
+    coverColor: "bg-slate-200",
+  },
+  {
+    id: "t6",
+    name: "BizPioneers",
+    competition: "Startup Thailand",
+    category: "บริหารธุรกิจ",
+    missingRoles: ["Marketing", "Pitching"],
+    missingCount: 2,
+    currentMembers: 2,
+    coverColor: "bg-yellow-100",
+  },
 ];
 
-// --- Algorithm ---
-const calculateMatchScore = (teamProfile: Profile, teamSeekingSkills: string[], candidate: Profile) => {
-  const matchedSkillsCount = teamSeekingSkills.filter(skill => 
-    candidate.hardSkills.map(s => s.toLowerCase()).includes(skill.toLowerCase())
-  ).length;
-  const skillRatio = teamSeekingSkills.length > 0 ? (matchedSkillsCount / teamSeekingSkills.length) : 0;
-  const skillScore = skillRatio * 40;
+export default function DashboardPage() {
+  const [activeTab, setActiveTab] = useState<'หาทีม' | 'อันดับ'>('หาทีม');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("ทั้งหมด");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const paceDiff = Math.abs(teamProfile.paceScale - candidate.paceScale);
-  const focusDiff = Math.abs(teamProfile.focusScale - candidate.focusScale);
-  const totalVibeDiff = paceDiff + focusDiff;
-  const vibeRatio = Math.max(0, (20 - totalVibeDiff) / 20);
-  const vibeScore = vibeRatio * 40;
-
-  const roleDiff = Math.abs(teamProfile.roleScale - candidate.roleScale);
-  const roleRatio = roleDiff / 10; 
-  const roleScore = roleRatio * 20;
-
-  const totalScore = Math.round(skillScore + vibeScore + roleScore);
-  
-  return {
-    totalScore,
-    breakdown: {
-      skillScore: Math.round(skillScore),
-      vibeScore: Math.round(vibeScore),
-      roleScore: Math.round(roleScore)
-    }
-  };
-};
-
-const getScoreColor = (score: number) => {
-  if (score >= 80) return 'text-vibe-pink bg-vibe-pink-light border-vibe-pink/20';
-  if (score >= 50) return 'text-amber-600 bg-amber-50 border-amber-200';
-  return 'text-vibe-red bg-red-50 border-red-200';
-};
-
-const getProgressBarColor = (score: number) => {
-  if (score >= 80) return 'bg-vibe-pink';
-  if (score >= 50) return 'bg-amber-400';
-  return 'bg-vibe-red';
-};
-
-export default function VibeMatchDashboard() {
-  const [activeTab, setActiveTab] = useState<'matches' | 'saved'>('matches');
-
-  const scoredCandidates = useMemo(() => {
-    return CANDIDATES.map(candidate => {
-      const match = calculateMatchScore(CURRENT_USER, SEEKING_SKILLS, candidate);
-      return { ...candidate, match };
-    }).sort((a, b) => b.match.totalScore - a.match.totalScore);
-  }, []);
+  // Filter Logic
+  const filteredTeams = MOCK_TEAMS.filter((team) => {
+    const matchesCategory = activeCategory === "ทั้งหมด" || team.category === activeCategory;
+    const matchesSearch = 
+      team.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      team.competition.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-700 font-sans selection:bg-vibe-pink/30 pb-20">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex">
       
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-vibe-pink flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white fill-current" />
-            </div>
-            <span className="text-xl font-bold text-vibe-navy tracking-tight">
-              Vibe Match
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-slate-400 hover:text-vibe-pink transition-colors">
-              <Search className="w-5 h-5" />
-            </button>
-            <div className="w-9 h-9 rounded-full border-2 border-slate-200 overflow-hidden bg-slate-100">
-              <img src={CURRENT_USER.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+      {/* Left Main Content */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         
-        {/* Header / Filter Section */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Current User Summary */}
-          <div className="lg:col-span-1 rounded-2xl bg-white border border-slate-200 p-6 shadow-md relative overflow-hidden group hover:border-vibe-pink/30 transition-colors">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-vibe-pink/10 blur-3xl -mr-10 -mt-10 rounded-full"></div>
-            
-            <div className="flex items-start gap-4 relative z-10">
-              <div className="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
-                <img src={CURRENT_USER.avatarUrl} alt={CURRENT_USER.name} className="w-full h-full object-cover" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-vibe-navy">{CURRENT_USER.name}</h1>
-                <p className="text-vibe-pink font-medium text-sm mt-1">{CURRENT_USER.role}</p>
-                <div className="flex flex-wrap gap-1 mt-3">
-                  {CURRENT_USER.hardSkills.map(skill => (
-                    <span key={skill} className="px-2 py-0.5 text-xs rounded-md bg-slate-100 text-slate-600 border border-slate-200">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Looking For Details */}
-          <div className="lg:col-span-2 rounded-2xl bg-white border border-slate-200 p-6 shadow-md relative overflow-hidden">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-              
-              <div className="space-y-4 flex-1">
-                <div className="flex items-center gap-2 text-slate-500 text-sm font-semibold uppercase tracking-wider">
-                  <Target className="w-4 h-4 text-vibe-pink" />
-                  Target Teammate Skills
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {SEEKING_SKILLS.map(skill => (
-                    <span key={skill} className="px-3 py-1 text-sm rounded-lg bg-vibe-pink-light text-vibe-pink border border-vibe-pink/20 font-medium">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="hidden md:block w-px h-16 bg-slate-200"></div>
-
-              <div className="space-y-4 flex-1">
-                <div className="flex items-center gap-2 text-slate-500 text-sm font-semibold uppercase tracking-wider">
-                  <Zap className="w-4 h-4 text-vibe-navy" />
-                  Team Chemistry Metrics
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-xs font-medium">
-                    <span className="text-slate-500">Pace: <span className="text-vibe-navy">Fast</span></span>
-                    <span className="text-slate-500">Focus: <span className="text-vibe-navy">Detail</span></span>
-                    <span className="text-slate-500">Role: <span className="text-vibe-navy">Planner</span></span>
-                  </div>
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex">
-                    <div className="h-full bg-vibe-navy w-1/3"></div>
-                    <div className="h-full bg-vibe-pink w-1/3"></div>
-                    <div className="h-full bg-slate-300 w-1/3"></div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* Tab Navigation */}
-        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-          <div className="flex gap-6">
-            <button 
-              onClick={() => setActiveTab('matches')}
-              className={`text-lg font-semibold transition-colors pb-4 -mb-[17px] border-b-2 ${activeTab === 'matches' ? 'text-vibe-navy border-vibe-navy' : 'text-slate-400 border-transparent hover:text-slate-600'}`}
-            >
-              Top Matches
-            </button>
-            <button 
-              onClick={() => setActiveTab('saved')}
-              className={`text-lg font-semibold transition-colors pb-4 -mb-[17px] border-b-2 ${activeTab === 'saved' ? 'text-vibe-navy border-vibe-navy' : 'text-slate-400 border-transparent hover:text-slate-600'}`}
-            >
-              Saved Profiles
-            </button>
-          </div>
-          <button className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-vibe-navy bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
-            <Filter className="w-4 h-4" />
-            Filters
-          </button>
-        </div>
-
-        {/* Match Results Grid */}
-        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {scoredCandidates.map((candidate, idx) => {
-            const score = candidate.match.totalScore;
-            const scoreTheme = getScoreColor(score);
-            const progressColor = getProgressBarColor(score);
-            
-            return (
-              <div 
-                key={candidate.id} 
-                className="group relative bg-white border border-slate-200 rounded-2xl p-6 hover:border-vibe-pink/40 transition-all duration-300 hover:shadow-xl hover:shadow-vibe-pink/5 hover:-translate-y-1 flex flex-col"
-              >
-                {/* Ranking Badge */}
-                <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-vibe-navy border border-slate-200 flex items-center justify-center text-xs font-bold text-white z-10 shadow-md">
-                  #{idx + 1}
-                </div>
-
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full border-2 border-white bg-slate-100 overflow-hidden relative shadow-sm">
-                      <img src={candidate.avatarUrl} alt={candidate.name} className="w-full h-full object-cover" />
-                      {score >= 80 && (
-                        <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white"></div>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-vibe-navy group-hover:text-vibe-pink transition-colors flex items-center gap-2">
-                        {candidate.name}
-                      </h3>
-                      <p className="text-sm text-slate-500 font-medium">{candidate.role}</p>
-                    </div>
-                  </div>
-                  
-                  {/* Score Circular Display or Badge */}
-                  <div className={`flex flex-col items-center justify-center px-3 py-1.5 rounded-xl border font-bold ${scoreTheme}`}>
-                    <span className="text-xl leading-none">{score}%</span>
-                    <span className="text-[10px] uppercase tracking-wider opacity-80 mt-0.5">Match</span>
-                  </div>
-                </div>
-
-                {/* Score Breakdown Bars */}
-                <div className="space-y-3 mb-6 flex-1">
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-500">Skill Gap</span>
-                      <span className="text-vibe-navy font-semibold">{candidate.match.breakdown.skillScore}/40</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className={`h-full ${progressColor}`} style={{ width: `${(candidate.match.breakdown.skillScore / 40) * 100}%` }}></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-500">Vibe Similarity</span>
-                      <span className="text-vibe-navy font-semibold">{candidate.match.breakdown.vibeScore}/40</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className={`h-full ${progressColor} opacity-80`} style={{ width: `${(candidate.match.breakdown.vibeScore / 40) * 100}%` }}></div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-500">Role Complement</span>
-                      <span className="text-vibe-navy font-semibold">{candidate.match.breakdown.roleScore}/20</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className={`h-full ${progressColor} opacity-60`} style={{ width: `${(candidate.match.breakdown.roleScore / 20) * 100}%` }}></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Skills & Badges */}
-                <div className="space-y-4 pt-4 border-t border-slate-100">
-                  <div className="flex flex-wrap gap-1.5">
-                    {candidate.hardSkills.slice(0, 4).map(skill => (
-                      <span 
-                        key={skill} 
-                        className={`px-2 py-1 text-xs rounded-md border ${
-                          SEEKING_SKILLS.some(s => s.toLowerCase() === skill.toLowerCase())
-                            ? 'bg-vibe-pink-light text-vibe-pink border-vibe-pink/20 font-medium'
-                            : 'bg-slate-50 text-slate-600 border-slate-200'
-                        }`}
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                    {candidate.hardSkills.length > 4 && (
-                      <span className="px-2 py-1 text-xs rounded-md bg-slate-50 text-slate-500 border border-slate-200">
-                        +{candidate.hardSkills.length - 4}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {candidate.earnedBadges.map(badge => (
-                      <div key={badge} className="flex items-center gap-1.5 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-100">
-                        <Award className="w-3 h-3" />
-                        {badge}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Action Button */}
-                <button className="mt-6 w-full py-2.5 rounded-xl font-medium text-sm bg-slate-100 hover:bg-slate-200 text-vibe-navy transition-colors flex items-center justify-center gap-2 group-hover:bg-vibe-pink group-hover:text-white group-hover:shadow-md">
-                  View Full Profile
-                  <ChevronRight className="w-4 h-4 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+        {/* Header */}
+        <header className="bg-white/80 backdrop-blur-md px-8 py-6 border-b border-slate-200 sticky top-0 z-30">
+          <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800 mb-4">โรงเรียน...</h1>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setActiveTab('หาทีม')}
+                  className={`px-6 py-2 rounded-full font-bold text-sm transition-colors ${
+                    activeTab === 'หาทีม' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:bg-slate-200'
+                  }`}
+                >
+                  หาทีม
+                </button>
+                <button 
+                  onClick={() => setActiveTab('อันดับ')}
+                  className={`px-6 py-2 rounded-full font-bold text-sm transition-colors ${
+                    activeTab === 'อันดับ' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:bg-slate-200'
+                  }`}
+                >
+                  อันดับ
                 </button>
               </div>
-            );
-          })}
-        </section>
+            </div>
+            
+            {/* Search Bar inside Header for compactness, or below based on Figma */}
+          </div>
+        </header>
 
-      </main>
+        {/* Main Scrollable Area */}
+        <main className="flex-1 overflow-y-auto p-8 relative">
+          <div className="max-w-5xl mx-auto space-y-6">
+            
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="ค้นหาทีม หรือ รายการแข่งขัน..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white border-none rounded-full pl-12 pr-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-300 text-slate-700 font-medium"
+              />
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+                    activeCategory === cat 
+                      ? 'bg-slate-700 text-white shadow-md border border-slate-700' 
+                      : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Grid of Teams */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
+              {filteredTeams.map(team => (
+                <div key={team.id} className="bg-white border border-slate-200 rounded-3xl p-4 flex flex-col gap-3 transition-transform hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/50 cursor-pointer">
+                  {/* Cover Image Placeholder */}
+                  <div className={`w-full h-32 rounded-2xl ${team.coverColor} flex flex-col items-center justify-center text-slate-400 border border-black/5`}>
+                     <ImageIcon className="w-8 h-8 mb-1 opacity-50" />
+                     <span className="text-xs font-semibold opacity-70">ชื่อรายการ: {team.competition}</span>
+                  </div>
+                  
+                  {/* Team Info */}
+                  <div className="px-2 pt-2 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-xs font-bold text-slate-500">ชื่อทีม : <span className="text-slate-800">{team.name}</span></p>
+                        <p className="text-xs font-bold text-slate-500">รายการแข่ง : <span className="text-slate-800">{team.competition}</span></p>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-2 border-t border-slate-300/50">
+                      <p className="text-xs font-bold text-slate-500">
+                        ขาด : <span className="text-vibe-red">{team.missingRoles.join(', ')}</span> ({team.missingCount} คน)
+                      </p>
+                    </div>
+
+                    {/* Members Avatar Row */}
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex -space-x-2">
+                        {Array.from({ length: team.currentMembers }).map((_, i) => (
+                          <div key={i} className="w-6 h-6 rounded-full bg-slate-300 border-2 border-[#EAEAEA] flex items-center justify-center">
+                             <User className="w-3 h-3 text-slate-500" />
+                          </div>
+                        ))}
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-400">อัปเดต 2 ชม. ที่แล้ว</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+          </div>
+
+          {/* Floating Action Button */}
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="absolute bottom-8 right-8 w-14 h-14 bg-vibe-red hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-transform z-40"
+          >
+            <Plus className="w-8 h-8" />
+          </button>
+        </main>
+      </div>
+
+
+      {/* --- Add Team Modal --- */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in zoom-in-95 duration-200">
+            
+            <button 
+              onClick={() => setIsAddModalOpen(false)}
+              className="absolute top-6 right-6 p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="p-8 md:p-10">
+              <h2 className="text-2xl font-bold text-slate-400 mb-8 lowercase">เพิ่มการหาทีม</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                {/* Left Column */}
+                <div className="space-y-6">
+                  {/* Team Name */}
+                  <div className="space-y-2">
+                    <label className="text-lg font-bold text-slate-800">ชื่อทีม</label>
+                    <input 
+                      type="text" 
+                      placeholder="เช่น CodeBreakers"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-300 font-bold text-slate-700"
+                    />
+                  </div>
+
+                  {/* Competition Name */}
+                  <div className="space-y-2">
+                    <label className="text-lg font-bold text-slate-800">รายการแข่งเป้าหมาย</label>
+                    <input 
+                      type="text" 
+                      placeholder="เช่น NSC 2026"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-300 font-bold text-slate-700"
+                    />
+                  </div>
+
+                  {/* Member Count */}
+                  <div className="space-y-2">
+                    <label className="text-lg font-bold text-slate-800">สมาชิกในทีม</label>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full px-4 py-1">
+                        <button className="text-xl font-bold text-slate-500 hover:text-slate-800">{'<'}</button>
+                        <span className="text-xl font-bold text-slate-800 w-6 text-center">2</span>
+                        <button className="text-xl font-bold text-slate-500 hover:text-slate-800">{'>'}</button>
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="w-8 h-8 rounded-full bg-slate-400"></div>
+                        <div className="w-8 h-8 rounded-full bg-slate-400"></div>
+                        <div className="w-8 h-8 rounded-full bg-slate-500 flex items-center justify-center text-white font-bold pb-0.5">+</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="space-y-2">
+                    <label className="text-lg font-bold text-slate-800">tag</label>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-slate-300 text-slate-700 text-sm font-bold rounded-lg">#model</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-6">
+                  {/* Category */}
+                  <div className="space-y-2">
+                    <label className="text-lg font-bold text-slate-800">สายการแข่ง (หมวดหมู่)</label>
+                    <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-300 font-bold text-slate-700 appearance-none">
+                      <option value="" disabled selected>เลือกสายการแข่ง</option>
+                      {CATEGORIES.filter(c => c !== "ทั้งหมด").map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Missing Roles */}
+                  <div className="space-y-2">
+                    <label className="text-lg font-bold text-slate-800">ตำแหน่งที่กำลังตามหา (ขาดอะไร)</label>
+                    <input 
+                      type="text" 
+                      placeholder="เช่น Frontend, UX/UI, พิธีกร"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-300 font-bold text-slate-700"
+                    />
+                  </div>
+
+                  {/* Additional Info */}
+                  <div className="space-y-2">
+                    <label className="text-lg font-bold text-slate-800">รายละเอียดอื่นๆ (อยากได้คนแบบไหน)</label>
+                    <textarea 
+                      rows={3}
+                      placeholder="เช่น ขอคนที่ขยัน สามารถประชุมดึกได้ ถนัดใช้ Figma..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-300 font-bold text-slate-700 resize-none"
+                    ></textarea>
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="mt-10 flex justify-end">
+                <button 
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-8 py-3 bg-vibe-red hover:bg-red-600 text-white font-bold rounded-xl transition-colors shadow-md"
+                >
+                  โพสต์หาทีม
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
+  );
+}
+
+// Simple Award Icon Component
+function AwardIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="6"/>
+      <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+    </svg>
   );
 }
