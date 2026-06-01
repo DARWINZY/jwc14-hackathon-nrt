@@ -1,50 +1,36 @@
-# 🚀 Project: Vibe Match
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-**"แพลตฟอร์มจับคู่ฟอร์มทีมแข่งขัน ด้วยสถิติเคมีการทำงาน (Team Chemistry Matchmaking)"**
+## Getting Started
 
-## Executive Summary (บทสรุปผู้บริหาร)
+First, run the development server:
 
-ในวงการแข่งขันวิชาการ Hackathon และค่ายนวัตกรรม การมีทีมที่แข็งแกร่งคือปัจจัยหลักของชัยชนะ แต่ปัญหาใหญ่ของนักเรียนนักศึกษาในปัจจุบันคือ "การขาดแคลนพื้นที่ในการหาเพื่อนร่วมทีมที่มีประสิทธิภาพ" แพลตฟอร์มโซเชียลมีเดียทั่วไปไม่สามารถคัดกรอง "พฤติกรรมการทำงาน" ได้ **Vibe Match** จึงถือกำเนิดขึ้นในฐานะ Web Application ที่ไม่ได้จับคู่คนจากแค่ "ความเก่ง (Hard Skills)" แต่ใช้ระบบอัลกอริทึมวิเคราะห์ "เคมีและสไตล์การทำงาน (Working Vibe)" เพื่อสร้างทีมที่ลงตัวที่สุด ลดปัญหาความขัดแย้ง และเพิ่มโอกาสในการคว้ารางวัล
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
----
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 🛑 The Pain Point (ปัญหาที่เราต้องการแก้)
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-ปัจจุบัน การหาเพื่อนฟอร์มทีมข้ามโรงเรียน หรือหาคนที่มีความสนใจเฉพาะทาง (เช่น สายเขียนโค้ด AI, สายทำกราฟิก UI/UX, สายนำเสนอธุรกิจ) มักจะเกิดขึ้นใน Facebook Group หรือ LINE OpenChat ซึ่งก่อให้เกิดปัญหา 3 ข้อหลัก:
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-1. **Unstructured Data (ข้อมูลกระจัดกระจายและค้นหายาก):** การโพสต์หาทีมเป็นเพียงข้อความธรรมดา โพสต์ตกไว ไม่สามารถใช้ระบบ Filter เพื่อระบุตัวตนคนที่ต้องการได้อย่างแม่นยำ
-2. **The "Self-Claim" Trap (ปัญหาการอวยตัวเอง):** ทุกคนสามารถพิมพ์บอกในโซเชียลได้ว่าตนเอง "เก่งและมีความรับผิดชอบ" แต่เมื่อถึงหน้างานจริง กลับพบปัญหาการเทงาน หรือมีอีโก้สูงจนทำงานร่วมกันไม่ได้
-3. **Chemistry Mismatch (เคมีและบทบาททับซ้อน):** ทีมที่รวมคนเก่งระดับหัวกะทิ อาจจะพังไม่เป็นท่า หากทุกคนต้องการเป็น "ผู้นำ (Planner)" และไม่มีใครยอมเป็น "ผู้ลงมือทำ (Executer)" หรือการที่คนนึงชอบปั่นงานโต้รุ่ง แต่เพื่อนร่วมทีมชอบทยอยทำล่วงหน้า ทำให้เกิดความหงุดหงิดและบั่นทอนศักยภาพของทีม
+## Learn More
 
----
+To learn more about Next.js, take a look at the following resources:
 
-## 💡 The Solution (ทางแก้ปัญหาของ Vibe Match)
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-Vibe Match เปลี่ยนวิธีการหาทีมจากการ "ตะโกนหา" เป็นการ "ชี้เป้าแบบแม่นยำ" ผ่านโครงสร้างแพลตฟอร์มที่ออกแบบมาเพื่อคัดกรองพฤติกรรมโดยเฉพาะ:
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-* **Profile-Centric & Skill Tagging:** ข้อมูลผู้ใช้ถูกจัดเก็บอย่างเป็นระบบ (Structured Data) สามารถค้นหาและ Filter ทักษะที่ต้องการได้อย่างรวดเร็ว เช่น ต้องการหาคนทำ "Computer Vision" หรือคนเก่ง "Pitching" ระบบจะดึงการ์ดโปรไฟล์ที่ตรงสเปกขึ้นมาทันที
-* **Behavioral Sliding Scale:** เลิกใช้แบบสอบถามที่น่าเบื่อ และเปลี่ยนเป็นการประเมินสไตล์การทำงานผ่าน "มาตรวัดขั้วตรงข้าม" (เช่น สายปั่นงานด่วน vs สายทยอยทำ) เพื่อหาตัวตนที่แท้จริงโดยไม่มีคำตอบที่ผิดหรือถูก
-* **Peer Endorsement System:** ข้อมูลความน่าเชื่อถือไม่ได้มาจากการประเมินตัวเอง แต่มาจากการได้รับ "Badge ชื่นชม" จากเพื่อนร่วมทีมในโปรเจกต์ก่อนหน้า (เช่น ได้รับ Badge 'เดอะแบก' หรือ 'พรีเซนต์ไฟลุก') สร้างความมั่นใจให้กับคนที่จะดึงตัวไปร่วมทีม
+## Deploy on Vercel
 
----
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## 🧠 Core Algorithm (หลักการทำงานของระบบจับคู่)
-
-อัลกอริทึมของ Vibe Match ทำงานภายใต้แนวคิด **"ดึงดูดสิ่งที่ขาด และสอดคล้องในสิ่งที่เป็น"** โดยคำนวณ Match Score ออกเป็น 3 แกนหลัก:
-
-1. **Skill Gap Score (40% - อุดรอยรั่วของทีม):** หาคนที่ "แตกต่าง" และมี Hard Skill ตรงกับตำแหน่งที่ทีมกำลังขาดแคลน
-2. **Vibe Similarity Score (40% - จังหวะชีวิตที่เหมือนกัน):** หาคนที่ "เหมือนกัน" ในแง่ของสไตล์การทำงาน (Pace & Focus) เช่น จับคู่คนชอบทำงานดึกไว้ด้วยกัน หรือคนเน้นความเนี้ยบของงานไว้ด้วยกัน เพื่อลดความขัดแย้ง
-3. **Role Complementary Score (20% - บทบาทที่เติมเต็มกัน):** ป้องกันปัญหาคนแย่งตำแหน่งกันบริหารจัดการ หากคนตั้งโพสต์มีสไตล์เป็น ผู้นำ/CTO ระบบจะให้น้ำหนักกับผู้สมัครที่เป็นสายลงมือทำ/Executer เพื่อให้ทีมเกิดความสมดุล
-
----
-
-## 🎯 Target Audience (กลุ่มเป้าหมาย)
-
-* **Primary Target:** นักเรียนมัธยมปลายในโครงการพิเศษ (เช่น วิทย์-คณิต, SMTE) และนักศึกษามหาวิทยาลัย ที่เดินสายแข่งขันในรายการต่างๆ (Hackathon, Business Pitching, ค่ายวิชาการ)
-* **Secondary Target:** ผู้จัดงานแข่งขัน (Organizers) ที่ต้องการลดอัตราการสละสิทธิ์ของเด็กร่วมค่ายที่เกิดจากปัญหา "หาเพื่อนร่วมทีมไม่ได้"
-
----
-
-## 🚀 Business & Future Value (คุณค่าในอนาคต)
-
-Vibe Match ไม่ได้เป็นเพียงเว็บบอร์ดหาเพื่อน แต่คือ **"ฐานข้อมูล Portfolio เชิงพฤติกรรม"** ระดับประเทศ ในระยะยาว แพลตฟอร์มนี้สามารถต่อยอดไปสู่ B2B (Business-to-Business) โดยให้บริษัทชั้นนำเข้ามาค้นหาและ Headhunt ตัวเต็งหรือเยาวชนที่มีศักยภาพการทำงานเป็นทีมสูง เข้าไปฝึกงานหรือร่วมงานในองค์กรได้จริง เนื่องจากเป็นแพลตฟอร์มเดียวที่มี Data ยืนยันพฤติกรรมการทำงานจากผู้ใช้จริง
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
